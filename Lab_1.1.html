@@ -10,43 +10,34 @@
 		var ctx = canvas.getContext("2d");
 
         
-        var x0 = 5, y0 = 5, x1 = 120, y1 = 90, temp;
-        var d = 2*b - a;
-        var x = 0, y = 0;
+        var x0 = 5, y0 = 50, x1 = 300, y1 = 200;
+        var x = x0, y = y0;
         var a, b, xn, yn;
 
-        if(Math.abs(y1-y0) <= Math.abs(x1-x0)) temp = 1;
-        else temp = -1;
-        if (temp)
+        if (Math.abs(y1-y0) <= Math.abs(x1-x0))
         {
-           var a = Math.abs(x1-x0);
-           var b = Math.abs(y1-y0);
-           if (x0<=x1)
-           { xn=x0; yn=y0;} 
-                else { xn=x1; yn=y1; if(y1-y0 < 0) dy=-1;}
+           a = Math.abs(x1-x0);
+           b = Math.abs(y1-y0);
         }   else{
-                   var a = Math.abs(y1-y0);
-                   var b = Math.abs(x1-x0);
-                   if (x0<=x1)
-                   { xn=x0; yn=y0;} 
-                        else { xn=x1; yn=y1; if(x1-x0 < 0) dy=-1;}
+                   a = Math.abs(y1-y0); //more then 45 degree -> invert
+                   b = Math.abs(x1-x0);
                 }
-
         
-        for (x=0; x<a; x++)
-            {
-            if (d>=0){
-                        x = x + 1;
-                        y = y + 1;
-                        d = d + 2*(b-a);
-                     } else {
-                                x = x + 1;
-                                y = y + 1;
-                                d = d + 2*b;  
-                            }
-            if(temp) ctx.fillRect(x, y, 1, 1);
-            else ctx.fillRect(y, x, 1, 1);
-            }
+        var d = 2*b - a;
+        
+        for (x; x<a; x++)
+        {
+        if (d>=0){
+                    x = x + 1;
+                    y = y + 1;
+                    d = d + 2*(b-a);
+                 } else {
+                            x = x + 1;
+                            d = d + 2*b;  
+                        }
+        ctx.fillRect(x, y, 1, 1); 
+        }
+       
         
     </script>
 </body>
