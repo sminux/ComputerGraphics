@@ -13,15 +13,15 @@
 	
 	function makeLine(ctx, x0, y0, x1, y1)
 	{
-	   var ort;
+	   var temp;
 	   var d = 2*b -a;
 	   var x = 0;
   	   var y = 0;
 	   var a, b, xn, yn;
 
-	if(Math.abs(y1-y0) <= Math.abs(x1-x0)) ort = 1;
+	if(Math.abs(y1-y0) <= Math.abs(x1-x0)) temp = 1; else temp = -1;
 	   
-	if (ort)
+	if (temp)
 	{
 	   var a = Math.abs(x1-x0);
 	   var b = Math.abs(y1-y0);
@@ -36,13 +36,16 @@
 	for (x=0; x<a; x++)
 		{
 		if (d>=0){
-		          y = y + 1;
-			  d = d + 2*(b-a);
- 			 } else
+                    x = x +1;
+                    y = y + 1;
+                    d = d + 2*(b-a);
+ 			    } else
 			{
-			d = d + 2*b;  
+                x = x +1;
+                y = y + 1;
+			    d = d + 2*b;  
 			}
-		if(ort) makeDot(ctx, x, y);
+		if(temp) makeDot(ctx, x, y);
 		else makeDot(ctx, y, x);
 		}
  	  }
@@ -66,7 +69,7 @@
                 var x = event.offsetX;
                 var y = event.offsetY;
                 makeDot(ctx, x, y);
-                // pangle.push(point);
+                //pangle.push(point);
                 //pangle++
             }
             if(event.button == 1)

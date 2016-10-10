@@ -36,9 +36,12 @@
         for (x=0; x<a; x++)
             {
             if (d>=0){
+                        x = x + 1;
                         y = y + 1;
                         d = d + 2*(b-a);
                      } else {
+                                x = x + 1;
+                                y = y + 1;
                                 d = d + 2*b;  
                             }
             if(temp) ctx.fillRect(x, y, 1, 1);

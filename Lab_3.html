@@ -1,0 +1,27 @@
+<html>
+<title>
+    Third lab.
+    Bezier curve
+</title>
+<body>
+    
+<canvas id="lab_3" width=800 height=900>
+	<script>
+		var canvas=document.getElementById("lab_3");
+		var ctx = canvas.getContext("2d");
+        function makeDot(ctx, x, y){
+            ctx.fillRect(x, y, 2, 2); 
+        }
+        var point[1].x = 2, point[1].y = 70, point[2].x = 100, point[2].y = 60, point[3].x = 150, point[3].y = 100;
+            var t = 0.5;
+            for(i = 0; i<; i+)
+                makeDot(ctx, (points[i].x+points[i+1].x)/2, (points[i].y+points[i+1].y)/2);
+            
+        var p = new Point((points[0].x+2*points[1].x+points[2].x)/4, (points[0].y+2*points[1].y+points[2].y)/4);
+        makeDot(ctx, p.x, p.y);
+        
+        //if((p.y-points[0].y)/(p.x - points[0].x)*(p.y-points[1].y)/(p.x - points[1].x)*(p.y-points[2].y)/(p.x - points[2].x) >=0) Curve(ctx, points);
+        
+    </script>
+</body>
+</html>
