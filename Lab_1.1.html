@@ -4,41 +4,171 @@
     Line
 </title>
 <body>
-<canvas id="lab_1" width=800 height=900>
+    <script>
+        function makeLine(x0, y0, x1, y1){   
+            var x = 0, y = 0;
+            var a, b;
+            if (Math.abs(y1-y0) <= Math.abs(x1-x0))
+            {
+                a = Math.abs(x1-x0);
+                b = Math.abs(y1-y0);
+                
+                var d = 2*b - a;
+                
+                if(x1>x0){                      //right down - ok
+                    if(y1>y0){
+                        x = x0; y = y0;
+                        for (x; x<x1; x++)
+                        {
+                        if (d>=0){
+                                y = y + 1;
+                                d = d + 2*(b-a);
+                             } else {
+                                        d = d + 2*b;  
+                                    }
+                        ctx.fillRect(x, y, 1, 1); 
+                        }
+                    } else{                     //right up - ok
+                        x = x0; y = y0;
+                        for (x; x<x1; x++)
+                        {
+                        if (d>=0){
+                                y = y - 1;
+                                d = d + 2*(b-a);
+                             } else {
+                                        d = d + 2*b;  
+                                    }
+                        ctx.fillRect(x, y, 1, 1); 
+                        }
+                    }
+                    
+                }else if (x1<x0){               //left down - ok
+                    if(y1>y0){
+                        x = x0; y = y0;
+                        for (x; x>x1; x--)
+                        {
+                        if (d>=0){
+                                y = y + 1;
+                                d = d + 2*(b-a);
+                             } else {
+                                        d = d + 2*b;  
+                                    }
+                        ctx.fillRect(x, y, 1, 1); 
+                        }
+                    }else{                      //left up - ok
+                        x = x0; y = y0;
+                        for (x; x>x1; x--)
+                        {
+                        if (d>=0){
+                                y = y - 1;
+                                d = d + 2*(b-a);
+                         } else {
+                                    d = d + 2*b;  
+                                }
+                        ctx.fillRect(x, y, 1, 1); 
+                        }
+                    }
+                    
+                }
+                
+
+            }else{
+                    a = Math.abs(y1-y0); //more then 45 degree -> invert
+                    b = Math.abs(x1-x0);
+                    
+                    var d = 2*b - a;
+                    
+                    if(y1>y0)
+                    {
+                        if (x1>x0)
+                        {                       //right down - ok
+                            x = x0; y = y0;
+                            for (y; y<y1; y++)
+                            {
+                            if (d>=0){   
+                                    x = x + 1;
+                                    d = d + 2*(b-a);
+                                 } else {                                            
+                                            d = d + 2*b;  
+                                        }
+                            ctx.fillRect(x, y, 1, 1); 
+                            }
+                        }else{                  //left down - ok
+                            x = x0; y = y0;
+                            for (y; y<y1; y++)
+                            {
+                            if (d>=0)
+                            {
+                                x = x - 1;
+                                d = d + 2*(b-a);  
+                            } else {                                        
+                                        d = d + 2*b;
+                                    }
+                            ctx.fillRect(x, y, 1, 1); 
+                            }
+                        }          
+                     }      
+                        
+                    if(y1<y0)
+                    {                           //left up - ok          
+                        if(x1<x0)
+                        {
+                            x = x0; y = y0;
+                            for (y; y>y1; y--)
+                            {
+                            if (d>=0){
+                                    x = x - 1;
+                                    d = d + 2*(b-a);  
+                                 } else {                                            
+                                            d = d + 2*b;
+                                        }
+                            ctx.fillRect(x, y, 1, 1); 
+                            }
+                        }else{                  //right up - ok
+                            x = x0; y = y0;
+                            for (y; y>y1; y--)
+                            {
+                            if (d>=0){
+                                    x = x + 1;
+                                    d = d + 2*(b-a);  
+                                 } else {                                            
+                                            d = d + 2*b;
+                                        }
+                            ctx.fillRect(x, y, 1, 1); 
+                            }
+                        }
+                        
+                    }                
+                }           
+    
+        }    
+    </script>
+<canvas id="lab_1" width="1000" height="1000">
 	<script>
 		var canvas=document.getElementById("lab_1");
 		var ctx = canvas.getContext("2d");
-
-        
-        var x0 = 5, y0 = 50, x1 = 500, y1 = 100;
-        var x = 0, y = 0;
-        var a, b, xn, yn;
-
-        if (Math.abs(y1-y0) <= Math.abs(x1-x0))
+        var k = 0;
+        var xs = 0, xe = 0, ys = 0, ye = 0;
+        function onClick()
         {
-           a = Math.abs(x1-x0);
-           b = Math.abs(y1-y0);
-            x = x0; y = y0;
-        }   else{
-                    a = Math.abs(y1-y0); //more then 45 degree -> invert
-                    b = Math.abs(x1-x0);
-                    x = y0; y = x0;
+            if(event.button == 0){
+                xe = event.offsetX;
+                ye = event.offsetY;
+                if(k == 0){
+                    alert("point: (x,y) = ("+ xe + ',' + ye + ")");
+                    ctx.fillRect(xe, ye, 1, 1);
+                    xs = xe; ys = ye;
+                    k++;
+                }else{   
+                    alert("line: start (x,y) = (" + xs + ',' + ys + "), end (x,y) = ("+ xe + ',' + ye + ")");
+                    makeLine(xs, ys, xe, ye);
+                    xs = 0; ys = 0; xe = 0; ye = 0;
+                    k--;
                 }
-        
-        var d = 2*b - a;
-        
-        for (x; x<a; x++)
-        {
-        if (d>=0){
-                    y = y + 1;
-                    d = d + 2*(b-a);
-                 } else {
-                            d = d + 2*b;  
-                        }
-        ctx.fillRect(x, y, 1, 1); 
+                 
+            }             
         }
-       
-        
+        canvas.addEventListener("click", onClick);        
     </script>
 </body>
 </html>
