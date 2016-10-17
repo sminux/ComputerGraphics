@@ -4,24 +4,194 @@
     Bezier curve
 </title>
 <body>
+    <script>
+        
+      function getBezierBasis(i, n, t) {
+        function f(n) {
+            return (n <= 1) ? 1 : n * f(n - 1);//just factorial
+        }
+        return (f(n)/(f(i)*f(n - i)))* Math.pow(t, i)*Math.pow(1 - t, n - i);//Bernshtein's polinom
+      }
+
+
+        function getBezierCurve(arr, step) {
+            if (step === undefined) {
+                step = 0.01;
+            }
+            var res = [];
+            step = step / arr.length;
+            for (var t = 0.0; t < 1 + step; t += step) {
+                if (t > 1) {
+                    t = 1;
+                }
+                var ind = res.length;
+                res[ind] = new Array(0, 0);
+                for (var i = 0; i < arr.length; i++) {
+                    var b = getBezierBasis(i, arr.length - 1, t);
+                    res[ind][0] += arr[i][0] * b;
+                    res[ind][1] += arr[i][1] * b;
+                }
+            }
+
+            return res;
+        }
+
+        function drawLines(ctx, arr, delay, pause) {
+            if (delay === undefined) {
+                delay = 20;
+            }
+
+            if (pause === undefined) {
+                pause = delay;
+            }
+            var i = 0;
+
+            function delayDraw() {
+                if (i >= arr.length - 1) {
+                    return;
+                }
+
+                ctx.moveTo(arr[i][0],arr[i][1]);
+                ctx.lineTo(arr[i+1][0],arr[i+1][1]);
+                ctx.strokeStyle = '#000000';
+                ctx.stroke();
+                ++i;
+
+                if (delay > 0) {
+                    setTimeout(delayDraw, delay);
+                } 
+                else {
+                    delayDraw();
+                }
+            }
+
+            if (pause > 0) {
+                setTimeout(delayDraw, pause);
+            }
+            else {
+                delayDraw();
+            }
+        }
+
+        function drawPixels(ctx, arr, delay, pause) {
+            if (delay === undefined) {
+                delay = 10;
+            }
+
+            if (pause === undefined) {
+                pause = delay;
+            }
+            var i = 0;
+            var pxl = ctx.createImageData(2,2);
+            var d  = pxl.data;                        //once per page
+            d[0]   = 0;
+            d[1]   = 0;
+            d[2]   = 0;
+            d[3]   = 255;
+
+            function delayDraw() {
+                if (i >= arr.length - 1) {
+                    return;
+                }
+                ctx.putImageData(pxl, arr[i][0], arr[i][1]);   
+                ++i;
+
+                if (delay > 0) {
+                    setTimeout(delayDraw, delay);
+                } 
+                else {
+                    delayDraw();
+                }
+            }
+
+            if (pause > 0) {
+                setTimeout(delayDraw, pause);
+            }
+            else {
+                delayDraw();
+            }
+        }
+
+        function drawPoints(ctx, arr, delay, pause) {
+            if (delay === undefined) {
+                delay = 0;
+            }
+
+            if (pause === undefined) {
+                pause = delay;
+            }
+
+            var i = 0;
+
+            function delayDraw() {
+
+                ctx.beginPath();
+                ctx.arc(arr[i][0],arr[i][1],pointRadius,0,2*Math.PI);
+                ctx.strokeStyle = '#FF0000';
+                ctx.stroke();
+
+                ctx.fillStyle = '#FF0000';
+                ctx.fillText((i + 1),arr[i][0],arr[i][1] - 10);
+
+                ctx.fillStyle = '#000000';
+                ctx.fillText(' (' + arr[i][0] + ', ' + arr[i][1] + ')', arr[i][0] + 15,arr[i][1] - 10);
+
+                if (++i >= arr.length) {
+                    return;
+                }
+
+                if (delay > 0) {
+                    setTimeout(delayDraw, delay);
+                } 
+                else {
+                    delayDraw();
+                }
+            }
+
+            if (pause > 0) {
+                setTimeout(delayDraw, pause);
+            }
+            else {
+                delayDraw();
+            }
+        }  
+    </script>
     
-<canvas id="lab_3" width=800 height=900>
+    
+    
+    
+<canvas id="lab_3" width=1200 height=1200>
 	<script>
 		var canvas=document.getElementById("lab_3");
 		var ctx = canvas.getContext("2d");
-        function makeDot(ctx, x, y){
-            ctx.fillRect(x, y, 2, 2); 
-        }
-        var point[1].x = 2, point[1].y = 70, point[2].x = 100, point[2].y = 60, point[3].x = 150, point[3].y = 100;
-            var t = 0.5;
-            for(i = 0; i<; i+)
-                makeDot(ctx, (points[i].x+points[i+1].x)/2, (points[i].y+points[i+1].y)/2);
-            
-        var p = new Point((points[0].x+2*points[1].x+points[2].x)/4, (points[0].y+2*points[1].y+points[2].y)/4);
-        makeDot(ctx, p.x, p.y);
+    
+        ctx.lineWidth=0.1;
+
+        var flow; 
+        var arr = new Array();
+    
         
-        //if((p.y-points[0].y)/(p.x - points[0].x)*(p.y-points[1].y)/(p.x - points[1].x)*(p.y-points[2].y)/(p.x - points[2].x) >=0) Curve(ctx, points);
+        arr[0] = new Array(0, 100);
+        arr[1] = new Array(100, 80);
+        arr[2] = new Array(150, 150);
+        arr[3] = new Array(200, 155);
         
+        arr[4] = new Array(300, 165);
+        arr[5] = new Array(330, 150);
+        arr[6] = new Array(375, 125);
+        arr[7] = new Array(400, 100);
+        arr[8] = new Array(375, 75);
+        arr[9] = new Array(340, 55);
+        arr[10] = new Array(320, 75);
+        arr[11] = new Array(290, 100);
+        arr[12] = new Array(300, 125);
+        arr[12] = new Array(325, 130);
+        arr[12] = new Array(330, 120);
+        flow = getBezierCurve(new Array(arr[0], arr[1], arr[2], arr[3]), 0.03);
+        flow = flow.concat(getBezierCurve(new Array(arr[3], arr[4], arr[5], arr[6], arr[7], arr[8], arr[9], arr[10], arr[11], arr[12]), 0.02));
+        drawLines(ctx, flow, 10);
+
     </script>
+    </canvas>
 </body>
 </html>
