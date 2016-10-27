@@ -141,20 +141,12 @@
                     return;
                 }
 
-                if (delay > 0) {
-                    setTimeout(delayDraw, delay);
-                } 
-                else {
-                    delayDraw();
-                }
+                if (delay > 0) setTimeout(delayDraw, delay);
+                else delayDraw();
             }
 
-            if (pause > 0) {
-                setTimeout(delayDraw, pause);
-            }
-            else {
-                delayDraw();
-            }
+            if (pause > 0) setTimeout(delayDraw, pause);
+            else delayDraw();
         }  
     </script>
     
