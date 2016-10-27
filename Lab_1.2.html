@@ -4,46 +4,50 @@
    Circle
 </title>
 <body>
-<canvas id="lab_1" width=800 height=900>
+<canvas id="lab_1" width=1400 height=700>
 	<script>
         var canvas=document.getElementById("lab_1");
 		var ctx = canvas.getContext("2d");
-		var r=200;
-		var x1=300;
-		var y1=300;
-		var error =0;
+		var r = 70;
+		var x1, y1;
+		var error = 0;
 		var delta = 1 - 2*r;
-		var x=0;
-		var y=r;
-		(function() 
-         {
-            while(y>=0)
-            {
-                    ctx.fillRect(x1 + x, y1 + y, 2, 2);
-                    ctx.fillRect(x1 + x, y1 - y, 2, 2);
-                    ctx.fillRect(x1 - x, y1 + y, 2, 2);
-                    ctx.fillRect(x1 - x, y1 - y, 2, 2);
-                    error = 2*(delta + y)-1;
-                    if((delta<0)&&(error<=0))
-                    {
-                        delta += 2* ++x +1;
-                        continue;
-                    }
-                    if((delta>0)&&(error>0))
-                    {
-                        delta += 1 - 2* --y;
-                        continue;
-                    }
-                    x++;
-                    delta += 2 * (x-y);
-                    y--;
-
-                    setTimeout(arguments.callee, 1000);
-
-            }
+		var x = 0;
+		var y = r;
+		function onClick()
+        {
+            if(event.button == 0){
+                x1 = event.offsetX;
+                y1 = event.offsetY;
+                //alert("The center of your circle with radius = 70px: \r [" + x1 + "; " + y1 + "]");
+                while(y >= 0)
+                {
+                        ctx.fillRect(x1 + x, y1 + y, 1, 1);
+                        ctx.fillRect(x1 + x, y1 - y, 1, 1);
+                        ctx.fillRect(x1 - x, y1 + y, 1, 1);
+                        ctx.fillRect(x1 - x, y1 - y, 1, 1);
+                        error = 2*(delta + y)-1;
+                        if((delta<0)&&(error<=0))
+                        {
+                            delta += 2* ++x +1;
+                            continue;
+                        }
+                        if((delta>0)&&(error>0))
+                        {
+                            delta += 1 - 2* --y;
+                            continue;
+                        }
+                        x++;
+                        delta += 2 * (x-y);
+                        y--;
+                }
+                x1 = 0; y1 = 0; x = 0; y = r;  delta = 1 - 2*r; error = 0;
+            }     
+            
         }
-        )();
+        canvas.addEventListener("click", onClick);  
+        
 	</script>
-</canvas>
+
 </body>
 </html>
