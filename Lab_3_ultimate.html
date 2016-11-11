@@ -9,11 +9,10 @@
         
       function getBezierBasis(i, n, t) {
         function f(n) {
-            return (n <= 1) ? 1 : n * f(n - 1);//just factorial
+            return (n <= 1) ? 1 : n * f(n - 1); //factorial
         }
-        return (f(n)/(f(i)*f(n - i)))* Math.pow(t, i)*Math.pow(1 - t, n - i);//Bernshtein's polinom
+        return (f(n)/(f(i)*f(n - i)))* Math.pow(t, i)*Math.pow(1 - t, n - i);   //Bernshtein's polinom
       }
-
 
         function getBezierCurve(arr, step) {
             if (step === undefined) {
