@@ -4,141 +4,89 @@
         Y - buffer
     </title>
 <body>
-<p>Press 'Enter' or 'Space' button for rasterization</p>
-<script>
-  var ys = [];
-  function putYs(x, y) 
-    {
-    if (ys[y] === undefined) 
-    {
-      ys[y] = new Array;
-    }
-    ys[y].push(x);
-  }
-    
-  function makeLine(ctx, x0, y0, x1, y1) {
-    var A = x1-x0;
-    var B = y1-y0;
-    var ort;
-    if (Math.abs(B)<=Math.abs(A)) ort = 1;
-    else ort = 0;
-    var dy = 1;
-    var a, b;
-    var xn, yn;
-    if (ort) {
-	a = Math.abs(A); 
-    b = Math.abs(B);
-    if (x0<=x1) 
-    {
- 	  xn = x0;
-      yn = y0;
-      if (B<0) dy=-1;
-    } else {
-	            xn = x1;
-                yn = y1;
-	            if (B>0) dy=-1;
-           }
-    } else {
-	            a = Math.abs(B); 
-                b = Math.abs(A);
-               if (y0<=y1) 
-               {
-                    xn = x0;
-                    yn = y0;
-	                if (A<0) dy=-1;
-        } else {
-                    xn = x1;
-                    yn = y1;
-	                if (A>0) dy=-1;
-        }
-    }
-    var d = 2*b-a;
-    var dflag = 0;
-    var y = 0, x = 0;
-    if (dy ==1) putYs(x0, y0);
-    else putYs(x1,y1);
-    for (x=0; x<a; x++) {
-      if (d>=0) 
-      {
-        y+=dy;
-        d += 2*(b-a);
-        dflag = 1;
-      } else {
-        d += 2*b;
-        dflag = 0;
-      }
-      if (ort) 
-      {
-          ctx.fillRect(x+xn, y+yn, 1, 1);
-          if (dflag) putYs(x+xn, y+yn);
-      }
-      else {
-          ctx.fillRect(y+xn, x+yn, 1, 1);
-	      putYs(y+xn, x+yn);
-      }
-    }
-  }
-  class Point {
-    constructor(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-  }
-</script>
-<canvas id='lab_2.1' width='1000' height='1000'>
-  <script>
-    var canvas = document.getElementById('lab_2.1');
-    var ctx = canvas.getContext('2d');
-    var p = [];
-    var k = 0;
-    
-    function onClick()
-    {
-        if (event.button == 0) 
-        {
-            var x = event.offsetX;
-            var y = event.offsetY;
-            let point = new Point(x, y);
-            p.push(point);
-            k++;
-                if (k>1) 
-                {
-                    makeLine(ctx, p[k-1].x, p[k-1].y, p[k-2].x, p[k-2].y);
-                }
-            ctx.fillRect(point.x, point.y, 1, 1);
-        } 
-    }
-    
-    function check(e) 
-    {
-        //alert(e.keyCode);//13 - enter, 32 - space
-        if(( e.keyCode == 13)||( e.keyCode == 32))
-        {          
-           makeLine(ctx, p[k-1].x, p[k-1].y, p[0].x, p[0].y);
-           var i=0;
-           for (i=0; i<canvas.height; i++) 
-           {
-             if (ys[i] !== undefined) 
-             {
-               var j=0;
-               var l=0;
-               ys[i].sort();
-               for (l=0; l<ys[i].length/2; l++) 
-               {
-                 for (j=ys[i][l*2]; j<ys[i][l*2+1]; j++) 
-                 {
-                   ctx.fillRect(j, i, 1, 1);
-                 }
-               }
-             }		
-	       }
-        }   
-	}
-        
-    canvas.addEventListener('click', onClick);
-    window.addEventListener('keydown',this.check,false);
-  </script>
-</canvas>
+<canvas id='lab_2.1' width='1000' height='1000' style="border:2px solid #000000;">
+        <script src = "../util/bresenhamLine.js"></script>
+        <script src = "../util/bresenhamCircle.js"></script>
+        <script src = "../util/polygonFill.js"></script>
+        <script src = "../util/fillRegion.js"></script>
+        <script src = "../util/util.js"></script>
+		<script>
+		function initCanvasPolygonFill()
+		{
+			var canvas = document.getElementById("lab_2.1");
+			var ctx = canvas.getContext("2d");
+			var polygon = [];
 
+
+			function createMouseEvent()
+			{
+				var R = 5;
+				
+				var x0 = null, y0 = null;
+				var xP = null, yP = null;
+				function reset()
+				{
+					canvas.removeEventListener("click",reset);
+					polygon = [];
+					x0 = null, y0 = null;
+					xP = null, yP = null;
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					canvas.addEventListener("click", click);
+				}
+				function click()
+				{
+					if (event.button != 0)
+						return;
+					if (x0 === null)
+					{ xP = x0 = event.offsetX;
+						yP = y0 = event.offsetY;
+
+						addPoint2Polygon(polygon, x0, y0);
+
+						ctx.fillStyle = "#FF0000";
+						bresCircle(ctx, x0, y0, R);
+						return;
+					}
+
+					x1 = event.offsetX;
+					y1 = event.offsetY;
+
+					if (dist(x1,y1,x0,y0) < R )
+					{
+						if (polygon.length >= 3)
+						{
+							canvas.removeEventListener("click",click);
+
+							addPoint2Polygon(polygon, x0, y0);
+							ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+							rect = findFramingRect(polygon);
+							ctx.fillStyle = "#00FF00";
+							drawRect(ctx, rect);
+
+							ctx.fillStyle = "#000000";
+							polygonDraw(ctx, polygon);
+
+							ctx.fillStyle = "#0000FF";
+							polygonFill(ctx,polygon);
+							canvas.addEventListener("click",reset);
+
+						}
+						return;
+					}
+
+					ctx.fillStyle = "#000000";
+					bresLine(ctx, xP, yP, x1, y1);
+					xP = x1; yP = y1;
+					addPoint2Polygon(polygon, xP, yP);
+				}
+				return { onClick: click };
+			}
+			var mouseEvent = createMouseEvent();
+			canvas.addEventListener("click", mouseEvent.onClick);
+		}
+		initCanvasPolygonFill();
+		</script>
+	</canvas>
 </body>
 </html>
