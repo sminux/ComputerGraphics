@@ -155,12 +155,10 @@
                 xe = event.offsetX;
                 ye = event.offsetY;
                 if(k == 0){
-                    //alert("point: (x,y) = ("+ xe + ',' + ye + ")");
                     ctx.fillRect(xe, ye, 1, 1);
                     xs = xe; ys = ye;
                     k++;
                 }else{   
-                    //alert("line: start (x,y) = (" + xs + ',' + ys + "), end (x,y) = ("+ xe + ',' + ye + ")");
                     makeLine(xs, ys, xe, ye);
                     xs = 0; ys = 0; xe = 0; ye = 0;
                     k--;
