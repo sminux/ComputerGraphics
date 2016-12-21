@@ -1,152 +1,461 @@
-<html>
-<head/>
-<body>
-<title>
-    Sixth lab.
+<HTML>
+<BODY>
+    <title>
+    Seventh lab.
     Lighting
 </title>
 
-<canvas id='lab_7' width='1000' height='500'>
+<p>Three dots for figure</p>
+<canvas id='lab_7' height='1000' width='1000'>
 <script>
-	var canvas=document.getElementById('lab_7');
-	var ctx=canvas.getContext('2d');
-	var triangle=[10,10,0,60,20,50,20,70,0];
-	var O=[100, 10, 60];
-	draw_triangle(ctx,triangle,'#FFFFFF');
-	ctx.fillStyle='#c0f0fb'; ctx.fillRect(O[0],O[1],3,3); 
-	var N=method(triangle);
-	var z=[];
-	for (i=10;i<70;i++)
-		for (j=10;j<90;j++)
-			z[j]=(-1)*(N[3]+N[1]*i+N[0]*j)/N[2];
-	fill_pixels(triangle,N,O); 
-	draw_triangle(ctx,triangle,'#FFFFFF');
-
-		function method(triangle) {
-		var N=[];
-		var M=[];
-		var M1=[];
-		for (i=0;i<3;i++) {
-			for (j=0;j<3;j++) {
-				M[i*4+j]=triangle[i*3+j];
-			}
-			M[i*4+3]=1;
+	var canvas = document.getElementById('lab_7');
+	var ctx = canvas.getContext('2d');
+	canvas.addEventListener("click", onClick);
+	function drawLine(x0, y0, x1, y1)
+	{
+		function sign(x) 
+		{
+			return (x > 0) ? 1 : (x < 0) ? -1 : 0;
+		};
+		var x, y, dx, dy, incx, incy, pdx, pdy, es, el, error;
+		dx = x1 - x0; 
+		dy = y1 - y0; 	
+		incx = sign(dx);
+		incy = sign(dy);
+		if (dx < 0) 
+			dx = Math.abs(dx);
+		if (dy < 0) 
+			dy = Math.abs(dy);
+		if(dx > dy) 
+		{
+			pdx = incx; 
+			pdy = 0;
+			es = dy; 
+			el = dx;	
 		}
-		for (i=0;i<12;i++) M1[i]=M[i];
-		for (k=0;k<2;k++) {
-			for (i=k+1;i<3;i++) {
-				for (j=0;j<4;j++) {
-					M1[i*4+j]=M[i*4+j]*M[k*4+k]-M[k*4+j]*M[i*4+k];
+		else 
+		{
+			pdx = 0;	
+			pdy = incy;
+			es = dx;
+			el = dy; 
+		}
+		x = x0;
+		y = y0;
+		error = el / 2;
+		ctx.fillRect(x, y, 1, 1);
+		for (t = 0; t < el; t++) 
+		{
+			error -= es;
+			if (error < 0)
+			{
+				error += el;
+				x += incx; 
+				y += incy;
+			}
+			else
+			{
+				x += pdx; 
+				y += pdy; 
+			}
+			ctx.fillRect(x, y, 1, 1);
+		}
+	}
+	
+	function BezierBasis(i, n, t) 
+	{		
+		function f(n) 
+		{
+			return (n <= 1) ? 1 : n * f(n-1);
+		};		
+		return (f(n) / (f(i) * f(n-i))) * Math.pow(t, i) * Math.pow(1-t, n-i);
+	}
+	
+	function BezierPoints(arr, step) 
+	{
+		if (step == undefined) 
+		{
+			step = 0.01;
+		}
+		var res = [];
+		for (var t = 0; t < 1 + step; t += step) 
+		{
+			if (t > 1) 
+				t = 1;
+			var ind = res.length;
+			res[ind] = new Array(0, 0, 0);
+			for (var i = 0; i < arr.length; i++) 
+			{
+				var b = BezierBasis(i, arr.length-1, t);
+				res[ind][0] += arr[i][0] * b;
+				res[ind][1] += arr[i][1] * b;
+				res[ind][2] += arr[i][2] * b;
+			}
+		}
+		
+		return res;
+	}
+	
+	function BezierLine(arr) 
+	{
+		for (var i = 0; i < arr.length - 1; ++i) 
+		{
+			drawLine(arr[i][0], arr[i][1], arr[i+1][0], arr[i+1][1]);
+		}
+	}
+
+	function comparison(a, b) 
+	{
+  		return (a > b) ? 1 : -1;
+	}
+	
+	function Barrel(points, ymin, ymax) 
+	{
+		var arr = new Array();
+		for (var i = ymin; i <= ymax; ++i)
+		{
+			arr[i] = new Array();
+		}
+		var ytemp, xtemp, dxdy, buf, dy1, dy2;
+		
+		for (var i = 0; i < points.length-1; ++i) 
+		{
+			if (i) 
+			{
+				dy2 = dy1;
+				dy1 = points[i+1][1] - points[i][1];
+			}
+			else 
+			{
+				dy1 = points[i+1][1] - points[i][1];
+				dy2 = dy1;
+			}
+			dxdy = (points[i+1][0] - points[i][0])/(Math.abs(points[i+1][1] - points[i][1]));
+			xtemp = points[i][0];
+			
+			if (points[i+1][1] > points[i][1]) 
+			{
+				if (dy1*dy2 > 0) 
+				{
+					for (var j = points[i][1]; j < points[i+1][1]; ++j) 
+					{
+						buf = arr[j].length;
+						arr[j][buf] = xtemp;
+						xtemp += dxdy;
+					}
+				}
+				else 
+				{
+					for (var j = points[i][1]+1; j < points[i+1][1]; ++j) 
+					{
+						buf = arr[j].length;
+						arr[j][buf] = xtemp;
+						xtemp += dxdy;
+					}
 				}
 			}
-			for (i=0;i<12;i++) M[i]=M1[i];
+			else if (points[i+1][1] < points[i][1]) 
+			{
+				if (dy1*dy2 > 0) 
+				{
+					for (var j = points[i][1]; j > points[i+1][1]; --j) 
+					{
+						buf = arr[j].length;
+						arr[j][buf] = xtemp;
+						xtemp += dxdy;
+					}
+				}
+				else 
+				{
+					for (var j = points[i][1]-1; j > points[i+1][1]; --j) 
+					{
+						buf = arr[j].length;
+						arr[j][buf] = xtemp;
+						xtemp += dxdy;
+					}
+				}
+			}
+			else 
+			{
+				ytemp = points[i][1];
+				buf = arr[ytemp].length;
+				arr[ytemp][buf] = points[i][0];
+				arr[ytemp][buf+1] = points[i+1][0];
+			}
 		}
-		N[3]=1; N[2]=(-1)*M[11]/M[10];
-		N[1]=((-1)*M[7]-N[2]*M[6])/M[5];
-		N[0]=((-1)*M[3]-N[2]*M[2]-N[1]*M[1])/M[0];
-		return N;
-	}
+		dy2 = dy1;
+		dy1 = points[0][1] - points[points.length-1][1];		
+		dxdy = (points[0][0] - points[points.length-1][0])/(Math.abs(points[0][1] - points[points.length-1][1]));
+		xtemp = points[points.length-1][0];
+		if (points[0][1] > points[points.length-1][1]) 
+		{
+			if (dy1*dy2 > 0) 
+			{
+				for (var j = points[points.length-1][1]; j < points[0][1]; ++j) 
+				{
+					buf = arr[j].length;
+					arr[j][buf] = xtemp;
+					xtemp += dxdy;
+				}
+			}
+			else 
+			{
+				for (var j = points[points.length-1][1]+1; j < points[0][1]; ++j) 
+				{
+					buf = arr[j].length;
+					arr[j][buf] = xtemp;
+					xtemp += dxdy;
+				}
+			}
+		}
+		else if (points[0][1] < points[points.length-1][1]) 
+		{
+			if (dy1*dy2 > 0) 
+			{
+				for (var j = points[points.length-1][1]; j > points[0][1]; --j) 
+				{
+					buf = arr[j].length;
+					arr[j][buf] = xtemp;
+					xtemp += dxdy;
+				}
+			}
+			else 
+			{
+				for (var j = points[points.length-1][1]-1; j > points[0][1]; --j) 
+				{
+					buf = arr[j].length;
+					arr[j][buf] = xtemp;
+					xtemp += dxdy;
+				}
+			}
+		}
+		else 
+		{
+			ytemp = points[points.length-1][1];
+			buf = arr[ytemp].length;
+			arr[ytemp][buf] = points[points.length-1][0];
+			arr[ytemp][buf+1] = points[0][0];
+		}
+		
+		for (var i = ymin; i <= ymax; ++i)
+			arr[i].sort(comparison);
+		
+		for (var i = ymin; i <= ymax; ++i) 
+		{
+			for (var j = 0; j < arr[i].length; j += 2) 
+			{
+				for (var k = arr[i][j]; k < arr[i][j+1]; k++)
+				{
+					ctx.fillRect(k, i, 2, 2);
+				}
+			}
+		}		
+	}	
 
-	function line(ctx,x0,y0,x1,y1,mode) {
-		var delta=0;
-		var or=1;
-		if (y1<y0) or=-1;
-		var y=0;
-		for (x=0; x<(x1-x0); x++) {
-			if (delta>=(x1-x0)) {
-				y++;
-				delta-=2*(x1-x0);
+	function Matrix(vector, matrix) 
+	{
+		var result = new Array();
+		result[0] = vector[0]*matrix[0][0] + vector[1]*matrix[1][0] + vector[2]*matrix[2][0] + vector[3]*matrix[3][0];
+		result[1] = vector[0]*matrix[0][1] + vector[1]*matrix[1][1] + vector[2]*matrix[2][1] + vector[3]*matrix[3][1];
+		result[2] = vector[0]*matrix[0][2] + vector[1]*matrix[1][2] + vector[2]*matrix[2][2] + vector[3]*matrix[3][2];
+		result[3] = vector[0]*matrix[0][3] + vector[1]*matrix[1][3] + vector[2]*matrix[2][3] + vector[3]*matrix[3][3];
+		return result;
+	}
+	
+	function figureCenter(x1, y1, x2, y2) 
+	{
+		var result = new Array();
+		result[0] = x1 + Math.floor((x2-x1)/2) + (y2-y1);
+		result[1] = y1 + Math.floor((y2-y1)/2) + (x2-x1);
+		return result;
+	}
+	
+	function rotation(points, center, angle) 
+	{
+		var res = new Array();
+		var temp;
+		var matrix = new Array();
+		
+		for (var i = 0; i < points.length; ++i) 
+		{
+			matrix[0] = new Array(1, 0, 0, 0);
+			matrix[1] = new Array(0, 1, 0, 0);
+			matrix[2] = new Array(0, 0, 1, 0);
+			matrix[3] = new Array((-1)*center[0], (-1)*center[1], 0, 1);
+			temp = Matrix(new Array(points[i][0], points[i][1], 0, 1), matrix);
+			
+			matrix[0] = new Array(Math.cos(angle*Math.PI/180), 0, (-1)*Math.sin(angle*Math.PI/180), 0);
+			matrix[1] = new Array(0, 1, 0, 0);
+			matrix[2] = new Array(Math.sin(angle*Math.PI/180), 0, Math.cos(angle*Math.PI/180), 0);
+			matrix[3] = new Array(0, 0, 0, 1);
+			temp = Matrix(new Array(temp[0], temp[1], temp[2], temp[3]), matrix);
+			
+			matrix[0] = new Array(1, 0, 0, 0);
+			matrix[1] = new Array(0, Math.cos(20*Math.PI/180), Math.sin(20*Math.PI/180), 0);
+			matrix[2] = new Array(0, (-1)*Math.sin(20*Math.PI/180), Math.cos(20*Math.PI/180), 0);
+			matrix[3] = new Array(0, 0, 0, 1);	
+			temp = Matrix(new Array(temp[0], temp[1], temp[2], temp[3]), matrix);
+			
+			matrix[0] = new Array(1, 0, 0, 0);
+			matrix[1] = new Array(0, 1, 0, 0);
+			matrix[2] = new Array(0, 0, 1, 0);
+			matrix[3] = new Array(center[0], center[1], 0, 1);
+			temp = Matrix(new Array(temp[0], temp[1], temp[2], temp[3]), matrix);
+			
+			res[i] = new Array(Math.floor(temp[0]/temp[3]), Math.floor(temp[1]/temp[3]), Math.floor(temp[2]/temp[3]));
+		}
+		
+		return res;
+	}
+	
+	function OrtNormal(vector1, vector2) 
+	{
+		var result = new Array();
+		
+		result[0] = vector1[1]*vector2[2] - vector2[1]*vector1[2];
+		result[1] = (-1)*(vector1[0]*vector2[2] - vector2[0]*vector1[2]);
+		result[2] = vector1[0]*vector2[1] - vector2[0]*vector1[1];
+		
+		var ort = Math.sqrt(result[0]*result[0] + result[1]*result[1] + result[2]*result[2]);
+		
+		result[0] /= ort;
+		result[1] /= ort;
+		result[2] /= ort;
+		
+		return result;
+	}
+	function LightWay(light, surface) {
+		var buf = new Array();
+		buf[0] = light[0] - surface[0];
+		buf[1] = light[1] - surface[1];
+		buf[2] = light[2] - surface[2];
+		var result = Math.sqrt(buf[0]*buf[0] + buf[1]*buf[1] + buf[2]*buf[2]);
+		return result;
+	}
+	
+	function OrtLightWay(light, surface) {
+		var result = new Array();
+		result[0] = light[0] - surface[0];
+		result[1] = light[1] - surface[1];
+		result[2] = light[2] - surface[2];
+		var ort = Math.sqrt(result[0]*result[0] + result[1]*result[1] + result[2]*result[2]);
+		result[0] /= ort;
+		result[1] /= ort;
+		result[2] /= ort;
+		return result;
+	}
+	
+	function Scalar(vector1, vector2) 
+	{
+		var result = vector1[0]*vector2[0] + vector1[1]*vector2[1] + vector1[2]*vector2[2];
+		return result;
+	}
+	
+	function Intensity(L, n, e, way) 
+	{
+		var result;
+		if (Scalar(L, n) > Math.PI) 
+		{
+			 result = 1;
+			return result;
+		}
+		else 
+		{
+			result = 100 + Math.abs( 100*(Scalar(L, n) + Math.pow(2*Scalar(L, n)*Scalar(e, n) - Scalar(e, L), 5) ) )/ (way + 10);
+			return result;
+		}
+	}
+	
+	var x, y, ymin, ymax;
+	var intensbuf = new Array();	
+	var light = new Array(1000, 0, 0);
+	var e = new Array(0, 0, 1);
+	var startPoints = new Array();
+	var i = 0;
+	var angle = 2;
+	var newPoints;
+	var bufPoints = new Array();
+	var idx = 0;
+	
+	function onClick()
+	{
+		if (event.which == 1)
+		{
+			if (i == 2) 
+			{
+				x = event.offsetX;
+				y = event.offsetY;
+				startPoints[i] = new Array(x, y, 0);
+				BezierLine(BezierPoints(startPoints, 0.01));
+				bufPoints[0] = BezierPoints(startPoints, 0.01);
+				for (var j = 0; j < 360; ++j) 
+				{
+					newPoints = rotation(startPoints, figureCenter(startPoints[0][0], startPoints[0][1], startPoints[2][0], startPoints[2][1]), angle + angle*j);
+					BezierLine(BezierPoints(newPoints, 0.01));
+					bufPoints[j+1] = BezierPoints(newPoints, 0.01);
+					
+				}
+				for (var k = 0; k < bufPoints.length - 1; ++k) 
+				{
+					for (var q = 0; q < bufPoints[k].length - 1; ++q) 
+					{ 
+						var p = new Array();
+						
+						p[0] = new Array( Math.round(bufPoints[k][q][0]), Math.round(bufPoints[k][q][1]), Math.round(bufPoints[k][q][2]) );
+						p[1] = new Array( Math.round(bufPoints[k+1][q][0]), Math.round(bufPoints[k+1][q][1]), Math.round(bufPoints[k+1][q][2]) );
+						p[2] = new Array( Math.round(bufPoints[k+1][q+1][0]), Math.round(bufPoints[k+1][q+1][1]), Math.round(bufPoints[k+1][q+1][2]) );
+						p[3] = new Array( Math.round(bufPoints[k][q+1][0]), Math.round(bufPoints[k][q+1][1]), Math.round(bufPoints[k][q+1][2]) );
+						
+						var n = OrtNormal(new Array(p[1][0] - p[0][0], p[1][1] - p[0][1], p[1][2] - p[0][2]), new Array(p[2][0] - p[0][0], p[2][1] - p[0][1], p[2][2] - p[0][2]));
+						var L = OrtLightWay(light, p[0]);
+						var way = LightWay(light, p[0]);
+						intensbuf[idx] = Intensity(L, n, e, way);
+						
+						idx++;
+					}
+				}
+				idx = 0;
+				intensbuf.sort(comparison);
+				var intensmax = intensbuf[intensbuf.length - 1];
+				for (var k = 0; k < bufPoints.length - 1; ++k) 
+				{
+					for (var q = 0; q < bufPoints[k].length - 1; ++q) 
+					{ 
+						var temparray = new Array(bufPoints[k][q][1], bufPoints[k][q+1][1], bufPoints[k+1][q][1], bufPoints[k+1][q+1][1]);
+						temparray.sort(comparison);
+						ymin = temparray[0];
+						ymax = temparray[temparray.length-1];
+						var p = new Array();
+						p[0] = new Array( Math.round(bufPoints[k][q][0]), Math.round(bufPoints[k][q][1]), Math.round(bufPoints[k][q][2]) );
+						p[1] = new Array( Math.round(bufPoints[k+1][q][0]), Math.round(bufPoints[k+1][q][1]), Math.round(bufPoints[k+1][q][2]) );
+						p[2] = new Array( Math.round(bufPoints[k+1][q+1][0]), Math.round(bufPoints[k+1][q+1][1]), Math.round(bufPoints[k+1][q+1][2]) );
+						p[3] = new Array( Math.round(bufPoints[k][q+1][0]), Math.round(bufPoints[k][q+1][1]), Math.round(bufPoints[k][q+1][2]) );
+						var n = OrtNormal(new Array(p[1][0] - p[0][0], p[1][1] - p[0][1], p[1][2] - p[0][2]), new Array(p[2][0] - p[0][0], p[2][1] - p[0][1], p[2][2] - p[0][2]));
+						var L = OrtLightWay(light, p[0]);
+						var way = LightWay(light, p[0]);
+						var intensity = Intensity(L, n, e, way);
+						var t = Math.round(255*(intensity-100)/(intensmax-100));
+						var str = "rgb(" + t.toString() + "," + t.toString() + "," + t.toString() + ")";
+						ctx.fillStyle = str;
+						Barrel(p, Math.round(ymin), Math.round(ymax));
+					}
+				}
+				var p = new Array();
+				var asd = new Array();
+				i = 0;
+				startPoints = [];
+				ctx.fillStyle = "rgb(0,0,0)";
 			}
-			delta+=2*or*(y1-y0);
-			if (mode) ctx.fillRect(x+x0,y*or+y0,1,1);
-			else ctx.fillRect(y*or+y0,x+x0,1,1);
-		}
-	}
-	function draw_line(ctx,x0,y0, x1,y1,color) {
-		ctx.fillStyle=color;
-		if (Math.abs(x1-x0)>=Math.abs(y1-y0)) {
-			if (x1>=x0) line(ctx,x0,y0,x1,y1,1);
-			else line(ctx,x1,y1,x0,y0,1);
-		} else {
-			if (y1>=y0) line(ctx,y0,x0,y1,x1,0);
-			else line(ctx,y1,x1,y0,x0,0);
-		}
-		ctx.fillStyle='#000000';
-	}
-	function lineR(ctx,x0,y0,x1,y1,mode,yc) {
-		var delta=0;
-		var or=1;
-		if (y1<y0) or=-1;
-		var y=0;
-		for (x=0; x<(x1-x0); x++) {
-			if (delta>=(x1-x0)) {
-				y++;
-				delta-=2*(x1-x0);
-			}
-			delta+=2*or*(y1-y0);
-			if (mode) { if (yc==y*or+y0) return x+x0; }
-			else if (yc==x+x0) return y*or+y0;
-		}
-	}
-	function doge_line(ctx,x0,y0, x1,y1,yc) {
-		if (Math.abs(x1-x0)>=Math.abs(y1-y0)) {
-			if (x1>=x0) return lineR(ctx,x0,y0,x1,y1,1,yc);
-			else return lineR(ctx,x1,y1,x0,y0,1,yc);
-		} else {
-			if (y1>=y0) return lineR(ctx,y0,x0,y1,x1,0,yc);
-			else return lineR(ctx,y1,x1,y0,x0,0,yc);
-		}
-	}
-	function draw_triangle(ctx,triangle,color) {
-		draw_line(ctx,triangle[0],triangle[1],triangle[3],triangle[4],color);
-		draw_line(ctx,triangle[3],triangle[4],triangle[6],triangle[7],color);
-		draw_line(ctx,triangle[6],triangle[7],triangle[0],triangle[1],color);
-	}
-	function rgbToHex(r, g, b) {
-		if (r > 255 || g > 255 || b > 255)
-			throw "Color component";
-		return ((r << 16) | (g << 7) | b).toString(16);
-	}
-	function getPixelColor(fx, fy) {
-		var p = ctx.getImageData(fx, fy, 1, 1).data;
-		var hex = "#" + ("000000" + rgbToHex(p[0], p[1], p[2])).slice(-6);
-		return hex;
-	}
-	function fill_pixels(triangle,N,O) {
-		var cur=[0,0,0]; 
-		var x0,x1;
-		for (i=triangle[1];i<triangle[4];i++) {
-			x0=doge_line(ctx,triangle[0],triangle[1],triangle[6],triangle[7],i)+1;
-			x1=doge_line(ctx,triangle[0],triangle[1],triangle[3],triangle[4],i);
-			for (j=x0; j<x1;j++) {
-				cur=[j,i,j-1];
-				var kos=((O[0]-cur[0])*(cur[0]-N[0])+(O[1]-cur[1])*(cur[1]-N[1])+(O[2]-cur[2])*(cur[2]-N[2]))/
-				(Math.sqrt(Math.pow(O[0]-cur[0],2)+Math.pow(O[1]-cur[1],2)+Math.pow(O[2]-cur[2],2))*
-				Math.sqrt(Math.pow(N[0]-cur[0],2)+Math.pow(N[1]-cur[1],2)+Math.pow(N[2]-cur[2],2)));
-				kos=kos*Math.sqrt(Math.pow(N[0]-cur[0],2)+Math.pow(N[1]-cur[1],2)+Math.pow(N[2]-cur[2],2));
-				var s='#'+rgbToHex(50, 4.5*kos, 0);
-				ctx.fillStyle=s;
-				ctx.fillRect(cur[0],cur[1],1,1);
+			else 
+			{
+				x = event.offsetX;
+				y = event.offsetY;
+				startPoints[i] = new Array(x, y, 10);
+				i++;
 			}
 		}
-		for (i=triangle[4];i<triangle[7];i++) {
-			x0=doge_line(ctx,triangle[0],triangle[1],triangle[6],triangle[7],i)+1;
-			x1=doge_line(ctx,triangle[6],triangle[7],triangle[3],triangle[4],i);
-			for (j=x0; j<x1;j++) {
-				cur=[j,i,j-1];
-				var kos=((O[0]-cur[0])*(cur[0]-N[0])+(O[1]-cur[1])*(cur[1]-N[1])+(O[2]-cur[2])*(cur[2]-N[2]))/
-				(Math.sqrt(Math.pow(O[0]-cur[0],2)+Math.pow(O[1]-cur[1],2)+Math.pow(O[2]-cur[2],2))*
-				Math.sqrt(Math.pow(N[0]-cur[0],2)+Math.pow(N[1]-cur[1],2)+Math.pow(N[2]-cur[2],2)));
-				kos=kos*Math.sqrt(Math.pow(N[0]-cur[0],2)+Math.pow(N[1]-cur[1],2)+Math.pow(N[2]-cur[2],2));
-				var s='#'+rgbToHex(50, 4.5*kos, 0);
-				ctx.fillStyle=s;
-				ctx.fillRect(cur[0],cur[1],1,1);
-			}
-		}
-	}
-
-
+	}	
 </script>
 </canvas>
-</body>
-</html>
+</BODY>
+</HTML>
